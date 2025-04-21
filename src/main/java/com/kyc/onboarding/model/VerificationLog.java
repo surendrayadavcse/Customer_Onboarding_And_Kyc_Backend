@@ -19,7 +19,12 @@ public class VerificationLog {
     private LocalDateTime attemptedAt;
     private String message;
 
-    @ManyToOne
+    @Override
+	public String toString() {
+		return "VerificationLog [id=" + id + ", verificationType=" + verificationType + ", status=" + status
+				+ ", attemptedAt=" + attemptedAt + ", message=" + message + ", user=" + user + "]";
+	}
+	@ManyToOne
     @JsonBackReference
     @JoinColumn(name = "user_id")
     private User user;
