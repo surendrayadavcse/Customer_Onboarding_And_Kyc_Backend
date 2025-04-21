@@ -17,11 +17,11 @@ public class KycDocument {
 
     private String aadharNumber;
     private String aadharImage; 
-    private boolean aadharVerified;
+//    private boolean aadharVerified;
 
     private String panNumber;
     private String panImage;
-    private boolean panVerified;
+//    private boolean panVerified;
 
     private String selfieImage;
 
@@ -40,8 +40,8 @@ public class KycDocument {
     public String getAadharImage() { return aadharImage; }
     public void setAadharImage(String aadharImage) { this.aadharImage = aadharImage; }
 
-    public boolean isAadharVerified() { return aadharVerified; }
-    public void setAadharVerified(boolean aadharVerified) { this.aadharVerified = aadharVerified; }
+//    public boolean isAadharVerified() { return aadharVerified; }
+//    public void setAadharVerified(boolean aadharVerified) { this.aadharVerified = aadharVerified; }
 
     public String getPanNumber() { return panNumber; }
     public void setPanNumber(String panNumber) { this.panNumber = panNumber; }
@@ -49,19 +49,19 @@ public class KycDocument {
     public String getPanImage() { return panImage; }
     public void setPanImage(String panImage) { this.panImage = panImage; }
 
-    public boolean isPanVerified() { return panVerified; }
-    public void setPanVerified(boolean panVerified) { this.panVerified = panVerified; }
+//    public boolean isPanVerified() { return panVerified; }
+//    public void setPanVerified(boolean panVerified) { this.panVerified = panVerified; }
 
     public String getSelfieImage() { return selfieImage; }
     public void setSelfieImage(String selfieImage) { this.selfieImage = selfieImage; }
  
     public User getUser() { return user; }
     public void setUser(User user) { this.user = user; }
-    public boolean getAadhaarVerified() {
-        return aadharVerified;
-    }
-	public boolean getPanVerified() {
-		// TODO Auto-generated method stub
-		 return panVerified;
-	}
+//    public boolean getAadhaarVerified() {
+//        return aadharVerified;
+//    }
+//	public boolean getPanVerified() {
+//		// TODO Auto-generated method stub
+//		 return panVerified;
+//	}
 }

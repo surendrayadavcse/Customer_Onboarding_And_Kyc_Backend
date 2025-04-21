@@ -43,10 +43,12 @@ public class KycDocumentService {
             kyc.setUser(user);
         }
 
-        if (kyc.getAadhaarVerified() !=false && kyc.getAadhaarVerified()) {
+        if (logService.isDocumentAlreadyVerified(user.getId(), "AADHAR")) {
             logService.logAttempt(user, "AADHAR", "SKIPPED", "Aadhar already verified. Skipping re-verification.");
             return "SKIPPED";
         }
+
+     
 
         String uploadDir = "uploads/aadhar/";
         String fileName = UUID.randomUUID() + "_" + aadharImage.getOriginalFilename();
@@ -70,7 +72,7 @@ public class KycDocumentService {
                 logService.logAttempt(user, "AADHAR", "FAILED", "OCR error: Pattern mismatch or invalid Aadhar number");
                 return "FAILED";
             } else {
-                kyc.setAadharVerified(true);
+//                kyc.setAadharVerified(true);
                 kycDocumentRepository.save(kyc);
 
                 logService.logAttempt(user, "AADHAR", "SUCCESS", "Aadhar verified via OCR");
@@ -95,10 +97,11 @@ public class KycDocumentService {
             kyc.setUser(user);
         }
 
-        if (kyc.getPanVerified() != false && kyc.getPanVerified()) {
+        if (logService.isDocumentAlreadyVerified(user.getId(), "PAN")) {
             logService.logAttempt(user, "PAN", "SKIPPED", "PAN already verified. Skipping re-verification.");
             return "SKIPPED";
         }
+
 
         String uploadDir = "uploads/pan/";
         String fileName = UUID.randomUUID() + "_" + panImage.getOriginalFilename();
@@ -122,7 +125,7 @@ public class KycDocumentService {
                 logService.logAttempt(user, "PAN", "FAILED", "OCR error: Pattern mismatch or invalid PAN number");
                 return "FAILED";
             } else {
-                kyc.setPanVerified(true);
+//                kyc.setPanVerified(true);
                 kycDocumentRepository.save(kyc);
 
                 logService.logAttempt(user, "PAN", "SUCCESS", "PAN verified via OCR");
@@ -171,18 +174,24 @@ public class KycDocumentService {
 
     // --- Helper Methods ---
     private boolean isValidAadharText(String extractedText) {
-        String digitsOnly = extractedText.replaceAll("[^0-9]", "");
-        if (digitsOnly.length() == 12) {
-            return true;
-        }
         Pattern pattern = Pattern.compile("\\d{4}\\s?\\d{4}\\s?\\d{4}");
         Matcher matcher = pattern.matcher(extractedText);
-        return matcher.find();
+        if (matcher.find()) {
+            System.out.println("Matched Aadhar: " + matcher.group()); // print the matched text
+            return true;
+        }
+        return false;
     }
+
 
     private boolean isValidPanText(String text) {
         Pattern pattern = Pattern.compile("[A-Z]{5}[0-9]{4}[A-Z]");
         Matcher matcher = pattern.matcher(text);
-        return matcher.find();
+        if(matcher.find()) {
+        	System.out.println("Matchedpan"+matcher.group());
+        	return true;
+        }
+//        return matcher.find();
+        return false;
     }
 }

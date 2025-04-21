@@ -77,6 +77,11 @@ public class UserController {
             return ResponseEntity.badRequest().body("Failed to update user details: " + e.getMessage());
         }
     }
+  
+  @GetMapping("/kyc-statistics")
+  public Map<String, Long> getKycStatistics() {
+      return userService.getKycStatistics();
+  }
     
 
 }

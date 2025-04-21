@@ -8,4 +8,6 @@ import java.util.List;
 @Repository
 public interface VerificationLogRepository extends JpaRepository<VerificationLog, Integer> {
     List<VerificationLog> findByUserId(int userId);
+//    List<VerificationLog> findByUserId(int userId);
+    boolean existsByUserIdAndVerificationTypeIgnoreCaseAndStatusIgnoreCase(int userId, String verificationType, String status);
 }
