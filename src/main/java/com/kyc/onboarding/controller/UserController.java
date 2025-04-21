@@ -32,24 +32,33 @@ public class UserController {
     }
 
 
-    @PostMapping("/login")
-    public ResponseEntity<Map<String, String>> login(@RequestBody Map<String, String> loginRequest) {
-        String token = userService.loginUser(loginRequest.get("email"), loginRequest.get("password"));
-        
-        if (token == null) {
-            return ResponseEntity
-                    .status(HttpStatus.UNAUTHORIZED)
-                    .body(Map.of("error", "Invalid Credentials"));
-        }
 
-        String role = "CUSTOMER";
-        Optional<User> userOpt = userService.userRepository.findByEmail(loginRequest.get("email"));
-        if (userOpt.isPresent()) {
-            role = userOpt.get().getRole();
-        }
-
-        return ResponseEntity.ok(Map.of("token", token, "role", role));
+  @PostMapping("/login")
+public ResponseEntity<Map<String, String>> login(@RequestBody Map<String, String> loginRequest) {
+    String token = userService.loginUser(loginRequest.get("email"), loginRequest.get("password"));
+    
+    if (token == null) {
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(Map.of("error", "Invalid Credentials"));
     }
+
+    String role = "CUSTOMER";
+    String kycStatus = "NOT_SUBMITTED"; // default value
+    Optional<User> userOpt = userService.userRepository.findByEmail(loginRequest.get("email"));
+    if (userOpt.isPresent()) {
+        User user = userOpt.get();
+        role = user.getRole();
+        kycStatus = user.getKycStatus();  // Fetch kycStatus from user entity
+    }
+
+    return ResponseEntity.ok(Map.of(
+        "token", token,
+        "role", role,
+        "kycstatus", kycStatus
+    ));
+}
+
     
     @GetMapping("/customers")
     public ResponseEntity<?> getAllCustomers() {
