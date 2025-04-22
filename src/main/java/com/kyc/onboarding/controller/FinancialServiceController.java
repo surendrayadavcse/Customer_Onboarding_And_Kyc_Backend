@@ -22,7 +22,7 @@ public class FinancialServiceController {
 	@Autowired
 	FinancialServiceService financialServiceService;
 
-	private static final String UPLOAD_DIR = System.getProperty("user.dir") + File.separator + "uploadeddoc" + File.separator;
+	private static final String UPLOAD_DIR = System.getProperty("user.dir") + File.separator + "uploads" + File.separator;
 
 	@PostMapping("/add")
 	public ResponseEntity<?> addService(
@@ -42,7 +42,7 @@ public class FinancialServiceController {
 	            File dest = new File(filePath);
 	            iconFile.transferTo(dest);
 
-	            service.setServiceIconPath("uploadeddoc/" + fileName);
+	            service.setServiceIconPath("uploads/" + fileName);
 	        }
 
 	        FinancialService savedService = financialServiceService.addService(service);

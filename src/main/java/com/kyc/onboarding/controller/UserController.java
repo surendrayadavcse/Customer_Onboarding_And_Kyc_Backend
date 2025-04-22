@@ -1,8 +1,12 @@
 package com.kyc.onboarding.controller;
 
 import com.kyc.onboarding.dto.CustomerDTO;
+import com.kyc.onboarding.dto.UserProfileResponseDTO;
 import com.kyc.onboarding.model.User;
 import com.kyc.onboarding.service.UserService;
+
+import jakarta.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -91,6 +95,29 @@ public ResponseEntity<Map<String, String>> login(@RequestBody Map<String, String
   public Map<String, Long> getKycStatistics() {
       return userService.getKycStatistics();
   }
+  
+  @GetMapping("/users/{userId}/profile")
+  public ResponseEntity<UserProfileResponseDTO> getUserProfile(@PathVariable int userId, HttpServletRequest request) {
+      UserProfileResponseDTO userProfile = userService.getUserProfile(userId);
+
+      String baseUrl = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + "/";
+
+      userProfile.setAadharImage(prependBaseUrlIfNeeded(userProfile.getAadharImage(), baseUrl));
+      userProfile.setPanImage(prependBaseUrlIfNeeded(userProfile.getPanImage(), baseUrl));
+      userProfile.setSelfieImage(prependBaseUrlIfNeeded(userProfile.getSelfieImage(), baseUrl));
+
+      return ResponseEntity.ok(userProfile);
+  }
+
+  private String prependBaseUrlIfNeeded(String imagePath, String baseUrl) {
+      if (imagePath != null && !imagePath.startsWith("http")) {
+          String finalPath = baseUrl + imagePath;
+          return finalPath.replace("\\", "/"); // Important fix: replace backslash with forward slash
+      }
+      return imagePath != null ? imagePath.replace("\\", "/") : null;
+  }
+
+
     
 
 }
