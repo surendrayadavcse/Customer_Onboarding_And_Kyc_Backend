@@ -38,7 +38,7 @@ public class UserController {
 
 
   @PostMapping("/login")
-public ResponseEntity<Map<String, String>> login(@RequestBody Map<String, String> loginRequest) {
+public ResponseEntity<Map<String, Object>> login(@RequestBody Map<String, String> loginRequest) {
     String token = userService.loginUser(loginRequest.get("email"), loginRequest.get("password"));
     
     if (token == null) {
@@ -49,17 +49,23 @@ public ResponseEntity<Map<String, String>> login(@RequestBody Map<String, String
 
     String role = "CUSTOMER";
     String kycStatus = "NOT_SUBMITTED"; // default value
+    Integer id=null;
     Optional<User> userOpt = userService.userRepository.findByEmail(loginRequest.get("email"));
     if (userOpt.isPresent()) {
         User user = userOpt.get();
         role = user.getRole();
-        kycStatus = user.getKycStatus();  // Fetch kycStatus from user entity
+        kycStatus = user.getKycStatus();  
+        id=user.getId();
+        
+        // Fetch kycStatus from user entity
     }
 
     return ResponseEntity.ok(Map.of(
+    		"id",id,
         "token", token,
         "role", role,
         "kycstatus", kycStatus
+        
     ));
 }
 
