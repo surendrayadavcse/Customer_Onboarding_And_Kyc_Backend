@@ -16,7 +16,11 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 
     boolean existsByEmail(String email);
     boolean existsByMobile(String mobile);
-    @Query("SELECT new com.kyc.onboarding.dto.CustomerDTO(u.fullName, u.email, u.kycStatus) FROM User u WHERE u.role = 'CUSTOMER'")
+    @Query("SELECT new com.kyc.onboarding.dto.CustomerDTO(u.fullName, u.email, u.kycStatus, u.registereddate) FROM User u WHERE u.role = 'CUSTOMER'")
     List<CustomerDTO> findAllCustomers();
-    long countByKycStatus(String kycStatus);
+    @Query(value = "SELECT COUNT(*) FROM users WHERE DATE(registereddate) = CURRENT_DATE AND role = 'CUSTOMER'", nativeQuery = true)
+    long countTodayRegisteredUsers();
+
+    long countByKycStatus(String kycStatus);//SELECT COUNT(*) FROM user WHERE kyc_status = ?1
+//	long countTodayRegisteredUsers();
 }

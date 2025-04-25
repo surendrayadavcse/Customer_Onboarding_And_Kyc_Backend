@@ -1,6 +1,7 @@
 package com.kyc.onboarding.model;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -24,8 +25,15 @@ public class User {
     private String kycStatus;
     private LocalDate dob;
     private String address;
+    private LocalDateTime registereddate;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    public LocalDateTime getRegistereddate() {
+		return registereddate;
+	}
+	public void setRegistereddate(LocalDateTime registereddate) {
+		this.registereddate = registereddate;
+	}
+	@OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     @JsonManagedReference
     private KycDocument kycDocument;
 

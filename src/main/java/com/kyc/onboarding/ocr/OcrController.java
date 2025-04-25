@@ -13,7 +13,7 @@ public class OcrController {
     private OcrService ocrService;
 
     // Endpoint to process the uploaded image and extract text
-    @PostMapping("/extract-text")
+    @PostMapping("/extracttext")
     public ResponseEntity<String> extractTextFromImage(@RequestParam("image") MultipartFile image) {
         try {
             // Call the OcrService to extract text from the uploaded image
