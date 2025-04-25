@@ -4,126 +4,73 @@ import com.kyc.onboarding.dto.CustomerDTO;
 import com.kyc.onboarding.dto.UserProfileResponseDTO;
 import com.kyc.onboarding.model.User;
 import com.kyc.onboarding.service.UserService;
-
 import jakarta.servlet.http.HttpServletRequest;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
+import java.util.*;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("api/user")
 public class UserController {
+
     @Autowired
     private UserService userService;
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody User user) {
-        try {
-            userService.registerUser(user);
-            return ResponseEntity.ok("User registered successfully");
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("Something went wrong");
-        }
+    public ResponseEntity<String> register(@RequestBody User user) {
+        userService.registerUser(user);
+        return ResponseEntity.ok("User registered successfully");
     }
 
+    @PostMapping("/login")
+    public ResponseEntity<Map<String, Object>> login(@RequestBody Map<String, String> loginRequest) {
+        String token = userService.loginUser(loginRequest.get("email"), loginRequest.get("password"));
 
+        User user = userService.userRepository.findByEmail(loginRequest.get("email")).orElseThrow();
 
-  @PostMapping("/login")
-public ResponseEntity<Map<String, Object>> login(@RequestBody Map<String, String> loginRequest) {
-    String token = userService.loginUser(loginRequest.get("email"), loginRequest.get("password"));
-    
-    if (token == null) {
-        return ResponseEntity
-                .status(HttpStatus.UNAUTHORIZED)
-                .body(Map.of("error", "Invalid Credentials"));
+        return ResponseEntity.ok(Map.of(
+                "id", user.getId(),
+                "token", token,
+                "role", user.getRole(),
+                "kycstatus", user.getKycStatus()
+        ));
     }
 
-    String role = "CUSTOMER";
-    String kycStatus = "NOT_SUBMITTED"; // default value
-    Integer id=null;
-    Optional<User> userOpt = userService.userRepository.findByEmail(loginRequest.get("email"));
-    if (userOpt.isPresent()) {
-        User user = userOpt.get();
-        role = user.getRole();
-        kycStatus = user.getKycStatus();  
-        id=user.getId();
-        
-        // Fetch kycStatus from user entity
-    }
-
-    return ResponseEntity.ok(Map.of(
-    		"id",id,
-        "token", token,
-        "role", role,
-        "kycstatus", kycStatus
-        
-    ));
-}
-
-    
-    @GetMapping("/customers")
-    public ResponseEntity<?> getAllCustomers() {
-        try {
-            List<CustomerDTO> customers = userService.getAllCustomers();
-
-            if (customers.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No customers found");
-            }
-
-            return ResponseEntity.ok(customers);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                                 .body("Something went wrong while fetching customers");
-        }
-    }
-
-  @PatchMapping("/update-details")
+    @PatchMapping("/uploadbasicdetails")
     public ResponseEntity<String> updateUserDetails(@RequestBody User user) {
-        try {
-            // Call service method to update only the fields that are provided
-            userService.updateUserDetails(user);
-            return ResponseEntity.ok("User details updated successfully.");
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Failed to update user details: " + e.getMessage());
-        }
+        userService.updateUserDetails(user);
+        return ResponseEntity.ok("User details updated successfully.");
     }
-  
-  @GetMapping("/kyc-statistics")
-  public Map<String, Long> getKycStatistics() {
-      return userService.getKycStatistics();
-  }
-  
-  @GetMapping("/users/{userId}/profile")
-  public ResponseEntity<UserProfileResponseDTO> getUserProfile(@PathVariable int userId, HttpServletRequest request) {
-      UserProfileResponseDTO userProfile = userService.getUserProfile(userId);
 
-      String baseUrl = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + "/";
+    @GetMapping("/getallcustomers")
+    public ResponseEntity<List<CustomerDTO>> getAllCustomers() {
+        return ResponseEntity.ok(userService.getAllCustomers());
+    }
 
-      userProfile.setAadharImage(prependBaseUrlIfNeeded(userProfile.getAadharImage(), baseUrl));
-      userProfile.setPanImage(prependBaseUrlIfNeeded(userProfile.getPanImage(), baseUrl));
-      userProfile.setSelfieImage(prependBaseUrlIfNeeded(userProfile.getSelfieImage(), baseUrl));
+    @GetMapping("/kycstatistics")
+    public Map<String, Long> getKycStatistics() {
+        return userService.getKycStatistics();
+    }
 
-      return ResponseEntity.ok(userProfile);
-  }
+    @GetMapping("/profile/{userId}")
+    public ResponseEntity<UserProfileResponseDTO> getUserProfile(@PathVariable int userId, HttpServletRequest request) {
+        UserProfileResponseDTO userProfile = userService.getUserProfile(userId);
 
-  private String prependBaseUrlIfNeeded(String imagePath, String baseUrl) {
-      if (imagePath != null && !imagePath.startsWith("http")) {
-          String finalPath = baseUrl + imagePath;
-          return finalPath.replace("\\", "/"); // Important fix: replace backslash with forward slash
-      }
-      return imagePath != null ? imagePath.replace("\\", "/") : null;
-  }
+        String baseUrl = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + "/";
 
+        userProfile.setAadharImage(prependBaseUrlIfNeeded(userProfile.getAadharImage(), baseUrl));
+        userProfile.setPanImage(prependBaseUrlIfNeeded(userProfile.getPanImage(), baseUrl));
+        userProfile.setSelfieImage(prependBaseUrlIfNeeded(userProfile.getSelfieImage(), baseUrl));
 
-    
+        return ResponseEntity.ok(userProfile);
+    }
 
+    private String prependBaseUrlIfNeeded(String imagePath, String baseUrl) {
+        if (imagePath != null && !imagePath.startsWith("http")) {
+            return (baseUrl + imagePath).replace("\\", "/");
+        }
+        return imagePath;
+    }
 }

@@ -2,6 +2,7 @@ package com.kyc.onboarding.service;
 
 import com.kyc.onboarding.dto.CustomerDTO;
 import com.kyc.onboarding.dto.UserProfileResponseDTO;
+import com.kyc.onboarding.exception.*;
 import com.kyc.onboarding.model.KycDocument;
 import com.kyc.onboarding.model.User;
 import com.kyc.onboarding.repository.KycDocumentsRepository;
@@ -11,15 +12,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.time.LocalDateTime;
+import java.util.*;
 
 @Service
 public class UserService {
     @Autowired
-	public UserRepository userRepository;
+    public UserRepository userRepository;
     @Autowired
     private PasswordEncoder passwordEncoder;
     @Autowired
@@ -31,11 +30,11 @@ public class UserService {
 
     public void registerUser(User user) {
         if (userRepository.existsByEmail(user.getEmail())) {
-            throw new IllegalArgumentException("Email is already registered");
+            throw new UserAlreadyExistsException("Email is already registered");
         }
 
         if (userRepository.existsByMobile(user.getMobile())) {
-            throw new IllegalArgumentException("Mobile number is already in use");
+            throw new UserAlreadyExistsException("Mobile number is already in use");
         }
 
         user.setPassword(passwordEncoder.encode(user.getPassword()));
@@ -43,23 +42,25 @@ public class UserService {
         user.setKycStatus("PENDING");
         user.setDob(null);
         user.setAddress(null);
+        user.setRegistereddate(LocalDateTime.now());
 
         userRepository.save(user);
     }
 
-
     public String loginUser(String email, String password) {
-        Optional<User> userOpt = userRepository.findByEmail(email);
-        if (userOpt.isPresent() && passwordEncoder.matches(password, userOpt.get().getPassword())) {
-            return jwtUtil.generateToken(email, userOpt.get().getRole());
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new InvalidCredentialsException("Invalid Credentials"));
+
+        if (!passwordEncoder.matches(password, user.getPassword())) {
+            throw new InvalidCredentialsException("Invalid Credentials");
         }
-        return null;
+
+        return jwtUtil.generateToken(email, user.getRole());
     }
+
     public List<CustomerDTO> getAllCustomers() {
         return userRepository.findAllCustomers();
     }
-
-
 
     public void checkAndUpdateKycStatus(User user) {
         if (user == null) {
@@ -68,7 +69,6 @@ public class UserService {
 
         boolean updated = false;
 
-        // Step 1: Address + DOB updated
         if (user.getAddress() != null && user.getDob() != null && !"STEP 1 COMPLETED".equals(user.getKycStatus())) {
             user.setKycStatus("STEP 1 COMPLETED");
             updated = true;
@@ -98,82 +98,72 @@ public class UserService {
         }
     }
 
-  public void updateUserDetails(User user) {
-   // Fetch the existing user by ID
-    User existingUser = userRepository.findById(user.getId())
-           .orElseThrow(() -> new RuntimeException("User not found"));
+    public void updateUserDetails(User user) {
+        User existingUser = userRepository.findById(user.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-    boolean updated = false; // Flag to check if fields were updated
+        boolean updated = false;
 
-    // Only update provided fields (dob and address)
-   if (user.getDob() != null) {
-        existingUser.setDob(user.getDob());
-       updated = true; // Set to true if dob is updated
+        if (user.getDob() != null) {
+            existingUser.setDob(user.getDob());
+            updated = true;
+        }
+
+        if (user.getAddress() != null) {
+            existingUser.setAddress(user.getAddress());
+            updated = true;
+        }
+
+        if (updated) {
+            userRepository.save(existingUser);
+            checkAndUpdateKycStatus(existingUser);
+        }
     }
 
-  if (user.getAddress() != null) {
-      existingUser.setAddress(user.getAddress());
-       updated = true; // Set to true if address is updated
-  }
-//
-//    // If either dob or address was updated, we update KYC status
-    if (updated) {
-//        // Save the updated user entity without overwriting other fields
-        userRepository.save(existingUser);
-//
-//        // Now, check and update the KYC status based on the updated details
-        checkAndUpdateKycStatus(existingUser);
+    public Map<String, Long> getKycStatistics() {
+        long totalUsers = userRepository.count();
+        long step1CompletedUsers = userRepository.countByKycStatus("STEP 1 COMPLETED");
+        long step2CompletedUsers = userRepository.countByKycStatus("STEP 2 COMPLETED");
+        long kycCompletedUsers = userRepository.countByKycStatus("KYC COMPLETED");
+        long pendingUsers = totalUsers - kycCompletedUsers;
+        long newRegistrations = userRepository.countTodayRegisteredUsers();
+
+        Map<String, Long> stats = new HashMap<>();
+        stats.put("totalUsers", totalUsers);
+        stats.put("step1CompletedUsers", step1CompletedUsers);
+        stats.put("step2CompletedUsers", step2CompletedUsers);
+        stats.put("kycCompletedUsers", kycCompletedUsers);
+        stats.put("pendingUsers", pendingUsers);
+        stats.put("newRegistrations", newRegistrations); // ✅ added here
+
+        return stats;
     }
-}
-  
-  public Map<String, Long> getKycStatistics() {
-      long totalUsers = userRepository.count();
-      long step1CompletedUsers = userRepository.countByKycStatus("STEP 1 COMPLETED");
-      long step2CompletedUsers = userRepository.countByKycStatus("STEP 2 COMPLETED");
-      long kycCompletedUsers = userRepository.countByKycStatus("KYC COMPLETED");
-
-      // Pending users: All users not having "KYC COMPLETED"
-      long pendingUsers = totalUsers - kycCompletedUsers;
-
-      Map<String, Long> stats = new HashMap();
-      stats.put("totalUsers", totalUsers);
-      stats.put("step1CompletedUsers", step1CompletedUsers);
-      stats.put("step2CompletedUsers", step2CompletedUsers);
-      stats.put("kycCompletedUsers", kycCompletedUsers);
-      stats.put("pendingUsers", pendingUsers); // Pending: those who are NOT "KYC COMPLETED"
-
-      return stats;
-  }
-  public UserProfileResponseDTO getUserProfile(int userId) {
-      User user = userRepository.findById(userId)
-              .orElseThrow();
-
-    
-	KycDocument kycDocument = kycDocumentRepository.findByUserId(userId);
-
-      UserProfileResponseDTO dto = new UserProfileResponseDTO();
-
-      dto.setId(user.getId());
-      dto.setFullName(user.getFullName());
-      dto.setMobile(user.getMobile());
-      dto.setEmail(user.getEmail());
-      dto.setRole(user.getRole());
-      dto.setKycStatus(user.getKycStatus());
-      dto.setDob(user.getDob() != null ? user.getDob().toString() : null);
-      dto.setAddress(user.getAddress());
-
-      if (kycDocument != null) {
-          dto.setAadharNumber(kycDocument.getAadharNumber());
-          dto.setAadharImage(kycDocument.getAadharImage());
-          dto.setPanNumber(kycDocument.getPanNumber());
-          dto.setPanImage(kycDocument.getPanImage());
-          dto.setSelfieImage(kycDocument.getSelfieImage());
-      }
-
-      return dto;
-  }
-  
-  
 
 
+    public UserProfileResponseDTO getUserProfile(int userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        KycDocument kycDocument = kycDocumentRepository.findByUserId(userId);
+
+        UserProfileResponseDTO dto = new UserProfileResponseDTO();
+        dto.setId(user.getId());
+        dto.setFullName(user.getFullName());
+        dto.setMobile(user.getMobile());
+        dto.setEmail(user.getEmail());
+        dto.setRole(user.getRole());
+        dto.setKycStatus(user.getKycStatus());
+        dto.setDob(user.getDob() != null ? user.getDob().toString() : null);
+        dto.setAddress(user.getAddress());
+
+        if (kycDocument != null) {
+            dto.setAadharNumber(kycDocument.getAadharNumber());
+            dto.setAadharImage(kycDocument.getAadharImage());
+            dto.setPanNumber(kycDocument.getPanNumber());
+            dto.setPanImage(kycDocument.getPanImage());
+            dto.setSelfieImage(kycDocument.getSelfieImage());
+        }
+
+        return dto;
+    }
 }

@@ -1,5 +1,6 @@
 package com.kyc.onboarding.service;
 
+import com.kyc.onboarding.exception.UserNotFoundException;
 import com.kyc.onboarding.model.Consent;
 import com.kyc.onboarding.model.User;
 import com.kyc.onboarding.repository.ConsentRepository;
@@ -22,9 +23,7 @@ public class ConsentService {
 
     public Consent submitConsent(int userId, boolean consentGiven) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "User with id " + userId + " not found"
-                ));
+                .orElseThrow(() -> new UserNotFoundException("User with id " + userId + " not found"));
 
         Consent consent = consentRepository.findByUserId(userId);
         if (consent == null) {
