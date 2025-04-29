@@ -13,7 +13,7 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, Integer> {
     Optional<User> findByEmail(String email);
     Optional<User> findByMobile(String mobile);
-
+    boolean existsById(int id);
     boolean existsByEmail(String email);
     boolean existsByMobile(String mobile);
     @Query("SELECT new com.kyc.onboarding.dto.CustomerDTO(u.fullName, u.email, u.kycStatus, u.registereddate) FROM User u WHERE u.role = 'CUSTOMER'")

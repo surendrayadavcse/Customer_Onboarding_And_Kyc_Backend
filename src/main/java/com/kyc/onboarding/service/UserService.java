@@ -166,4 +166,10 @@ public class UserService {
 
         return dto;
     }
+    public String getKycStatusByUserId(int userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        return user.getKycStatus();
+    }
+
 }

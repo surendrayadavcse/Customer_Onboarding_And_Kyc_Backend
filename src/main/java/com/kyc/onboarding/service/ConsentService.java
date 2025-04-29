@@ -36,4 +36,19 @@ public class ConsentService {
 
         return consentRepository.save(consent);
     }
+    public Boolean getConsentStatus(int userId) {
+        // First, check if the user exists
+        userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("User with id " + userId + " not found"));
+
+        // Then check if consent exists
+        Consent consent = consentRepository.findByUserId(userId);
+        if (consent == null) {
+            throw new UserNotFoundException("User with id " + userId + " not found");
+        }
+
+        return consent.isConsentGiven();
+    }
+
+
 }

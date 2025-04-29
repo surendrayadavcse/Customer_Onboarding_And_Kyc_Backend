@@ -37,7 +37,7 @@ public class UserController {
                 "kycstatus", user.getKycStatus()
         ));
     }
-
+    
     @PatchMapping("/uploadbasicdetails")
     public ResponseEntity<String> updateUserDetails(@RequestBody User user) {
         userService.updateUserDetails(user);
@@ -73,4 +73,15 @@ public class UserController {
         }
         return imagePath;
     }
+    
+    @GetMapping("/kycstatus/{userId}")
+    public ResponseEntity<Map<String, String>> getKycStatus(@PathVariable int userId) {
+        String kycStatus = userService.getKycStatusByUserId(userId);
+
+        Map<String, String> response = new HashMap<>();
+        response.put("kycStatus", kycStatus);
+
+        return ResponseEntity.ok(response);
+    }
+
 }

@@ -21,4 +21,10 @@ public class ConsentController {
         consentService.submitConsent(consentRequestDTO.getUserId(), consentRequestDTO.isConsentGiven());
         return ResponseEntity.ok(Map.of("message", "Consent submitted successfully"));
     }
+    @GetMapping("/status/{userId}")
+    public ResponseEntity<?> getConsentStatus(@PathVariable int userId) {
+        boolean consentGiven = consentService.getConsentStatus(userId);
+        return ResponseEntity.ok(Map.of("consentGiven", consentGiven));
+    }
+
 }
