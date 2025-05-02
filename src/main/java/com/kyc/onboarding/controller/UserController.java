@@ -1,5 +1,6 @@
 package com.kyc.onboarding.controller;
 
+import com.kyc.onboarding.dto.AddressDobDTO;
 import com.kyc.onboarding.dto.CustomerDTO;
 import com.kyc.onboarding.dto.UserProfileResponseDTO;
 import com.kyc.onboarding.model.User;
@@ -91,6 +92,17 @@ public class UserController {
     public String getemailbyid(@PathVariable Integer userId) {
         return userService.getemailbyid(userId);
     }
+    
+    @GetMapping("/addressdob/{userId}")
+    public ResponseEntity<AddressDobDTO> getAddressAndDob(@PathVariable int userId) {
+        AddressDobDTO dto = userService.getAddressAndDob(userId);
+        return ResponseEntity.ok(dto);
+    }
+
+    
+    
+    
+    
     
 
 }

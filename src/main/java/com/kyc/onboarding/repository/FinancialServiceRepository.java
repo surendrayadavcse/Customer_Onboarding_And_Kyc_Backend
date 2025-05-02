@@ -1,4 +1,4 @@
-package com.kyc.onboarding.repository;
+ package com.kyc.onboarding.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
