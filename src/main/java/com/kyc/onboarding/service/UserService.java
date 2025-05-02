@@ -1,5 +1,6 @@
 package com.kyc.onboarding.service;
 
+import com.kyc.onboarding.dto.AddressDobDTO;
 import com.kyc.onboarding.dto.CustomerDTO;
 import com.kyc.onboarding.dto.UserProfileResponseDTO;
 import com.kyc.onboarding.exception.*;
@@ -185,5 +186,13 @@ public class UserService {
 		User user = userOpt.get();
 		return user.getEmail();
 	}
+
+	public AddressDobDTO getAddressAndDob(int userId) {
+	    User user = userRepository.findById(userId)
+	        .orElseThrow(() -> new RuntimeException("User not found"));
+	    
+	    return new AddressDobDTO(user.getAddress(), user.getDob());
+	}
+
 
 }
