@@ -10,6 +10,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 @RestController
 @RequestMapping("api/user")
@@ -43,7 +46,7 @@ public class UserController {
         userService.updateUserDetails(user);
         return ResponseEntity.ok("User details updated successfully.");
     }
-
+ 
     @GetMapping("/getallcustomers")
     public ResponseEntity<List<CustomerDTO>> getAllCustomers() {
         return ResponseEntity.ok(userService.getAllCustomers());
@@ -83,5 +86,11 @@ public class UserController {
 
         return ResponseEntity.ok(response);
     }
+    
+    @GetMapping("/getemailbyid/{userId}")
+    public String getemailbyid(@PathVariable Integer userId) {
+        return userService.getemailbyid(userId);
+    }
+    
 
 }

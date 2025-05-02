@@ -9,7 +9,7 @@ import java.util.Base64;
 
 @Component
 public class JwtUtil {
-    private static final String SECRET = "yourSuperSecretKeyWithAtLeast32Characters";
+    private static final String SECRET = "SurendraHarshPranitHyndaviBhavanSujeet";
     private final Key SECRET_KEY = Keys.hmacShaKeyFor(Base64.getEncoder().encode(SECRET.getBytes()));
 
     public String generateToken(String email, String role) {
