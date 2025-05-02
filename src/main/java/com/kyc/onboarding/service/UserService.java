@@ -83,10 +83,16 @@ public class UserService {
         boolean panSuccess = verificationLogService.hasSuccessfulVerification(user.getId(), "PAN");
         boolean selfieSuccess = verificationLogService.hasSuccessfulVerification(user.getId(), "SELFIE");
 
-        if (aadharSuccess && panSuccess && !"STEP 2 COMPLETED".equals(user.getKycStatus()) && !"KYC COMPLETED".equals(user.getKycStatus())) {
-            user.setKycStatus("STEP 2 COMPLETED");
-            updated = true;
-        }
+        if (aadharSuccess && panSuccess &&
+        	    user.getKycDocument().getAadharNumber() != null &&
+        	    user.getKycDocument().getPanNumber() != null &&
+        	    !"STEP 2 COMPLETED".equals(user.getKycStatus()) &&
+        	    !"KYC COMPLETED".equals(user.getKycStatus())) {
+        	    
+        	    user.setKycStatus("STEP 2 COMPLETED");
+        	    updated = true;
+        	}
+
 
         if (selfieSuccess && !"KYC COMPLETED".equals(user.getKycStatus())) {
             user.setKycStatus("KYC COMPLETED");
@@ -139,12 +145,11 @@ public class UserService {
         return stats;
     }
 
-
     public UserProfileResponseDTO getUserProfile(int userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        KycDocument kycDocument = kycDocumentRepository.findByUserId(userId);
+        Optional<KycDocument> optionalKycDocument = kycDocumentRepository.findByUserId(userId);
 
         UserProfileResponseDTO dto = new UserProfileResponseDTO();
         dto.setId(user.getId());
@@ -156,20 +161,29 @@ public class UserService {
         dto.setDob(user.getDob() != null ? user.getDob().toString() : null);
         dto.setAddress(user.getAddress());
 
-        if (kycDocument != null) {
+        optionalKycDocument.ifPresent(kycDocument -> {
             dto.setAadharNumber(kycDocument.getAadharNumber());
             dto.setAadharImage(kycDocument.getAadharImage());
             dto.setPanNumber(kycDocument.getPanNumber());
             dto.setPanImage(kycDocument.getPanImage());
             dto.setSelfieImage(kycDocument.getSelfieImage());
-        }
+        });
 
         return dto;
     }
+
     public String getKycStatusByUserId(int userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         return user.getKycStatus();
     }
+
+	public String getemailbyid(Integer userId) {
+		// TODO Auto-generated method stub
+		Optional<User> userOpt=userRepository.findById(userId);
+		
+		User user = userOpt.get();
+		return user.getEmail();
+	}
 
 }

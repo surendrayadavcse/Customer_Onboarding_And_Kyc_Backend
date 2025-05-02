@@ -51,4 +51,22 @@ public class GlobalExceptionHandler {
     public ResponseEntity<?> handleGeneric(Exception ex) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Something went wrong");
     }
+    @ExceptionHandler(InvalidDocumentFormatException.class)
+    public ResponseEntity<String> handleInvalidDocFormat(InvalidDocumentFormatException ex) {
+        return ResponseEntity.badRequest().body(ex.getMessage());
+    }
+    @ExceptionHandler(AadhaarAlreadyVerifiedException.class)
+    public ResponseEntity<String> handleAadharVerified(AadhaarAlreadyVerifiedException ex) {
+    	  return ResponseEntity.badRequest().body(ex.getMessage());
+    }
+    
+    @ExceptionHandler(PanAlreadyVerifiedException.class)
+    public ResponseEntity<String> handlePanVerified(PanAlreadyVerifiedException ex) {
+    	return ResponseEntity.badRequest().body(ex.getMessage());
+    }
+    @ExceptionHandler(KycDocumentNotFoundException.class)
+    public ResponseEntity<String> handleKycDocumentNotFound(KycDocumentNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    }
+   
 }
