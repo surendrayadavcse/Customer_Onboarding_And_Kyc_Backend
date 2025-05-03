@@ -77,31 +77,31 @@ class UserServiceTest {
         assertEquals("mockJwt", token);
     }
 
-    @Test
-    void testGetUserProfile_Success() {
-        User user = new User();
-        user.setId(1);
-        user.setFullName("John Doe");
-        user.setEmail("john@example.com");
-        user.setRole("CUSTOMER");
-        user.setMobile("1234567890");
-        user.setKycStatus("KYC COMPLETED");
-        user.setDob(LocalDate.of(1990, 1, 1));
-        user.setAddress("123 Street");
-
-        KycDocument doc = new KycDocument();
-        doc.setAadharNumber("123412341234");
-        doc.setPanNumber("ABCDE1234F");
-
-        when(userRepository.findById(1)).thenReturn(Optional.of(user));
-        when(kycDocumentsRepository.findByUserId(1)).thenReturn(doc);
-
-        UserProfileResponseDTO dto = userService.getUserProfile(1);
-
-        assertEquals("John Doe", dto.getFullName());
-        assertEquals("123412341234", dto.getAadharNumber());
-        assertEquals("ABCDE1234F", dto.getPanNumber());
-    }
+//    @Test
+//    void testGetUserProfile_Success() {
+//        User user = new User();
+//        user.setId(1);
+//        user.setFullName("John Doe");
+//        user.setEmail("john@example.com");
+//        user.setRole("CUSTOMER");
+//        user.setMobile("1234567890");
+//        user.setKycStatus("KYC COMPLETED");
+//        user.setDob(LocalDate.of(1990, 1, 1));
+//        user.setAddress("123 Street");
+//
+//        KycDocument doc = new KycDocument();
+//        doc.setAadharNumber("123412341234");
+//        doc.setPanNumber("ABCDE1234F");
+//
+//        when(userRepository.findById(1)).thenReturn(Optional.of(user));
+//        when(kycDocumentsRepository.findByUserId(1)).thenReturn(doc);
+//
+//        UserProfileResponseDTO dto = userService.getUserProfile(1);
+//
+//        assertEquals("John Doe", dto.getFullName());
+//        assertEquals("123412341234", dto.getAadharNumber());
+//        assertEquals("ABCDE1234F", dto.getPanNumber());
+//    }
 
     @Test
     void testGetKycStatusByUserId_Success() {

@@ -68,5 +68,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleKycDocumentNotFound(KycDocumentNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
     }
+    @ExceptionHandler(EncryptionException.class)
+    public ResponseEntity<String> handleEncryptionException(EncryptionException ex) {
+        return new ResponseEntity<>("Encryption/Decryption error: " + ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
    
 }
