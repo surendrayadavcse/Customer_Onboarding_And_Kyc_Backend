@@ -32,7 +32,7 @@ public class KycDocumentController {
         String extractedAadhar = kycDocumentService.uploadAadhar(userId, aadharImage);
 
         Map<String, String> response = new HashMap<>();
-        response.put("message", "Aadhar OCR validated, awaiting OTP verification.");
+        response.put("message", "Aadhar validated, awaiting OTP verification.");
         response.put("extractedText", extractedAadhar);
         return ResponseEntity.ok(response);
     }
@@ -46,7 +46,7 @@ public class KycDocumentController {
         String extractedPan = kycDocumentService.uploadPan(userId, panImage);
 
         Map<String, String> response = new HashMap<>();
-        response.put("message", "PAN OCR validated, awaiting OTP verification.");
+        response.put("message", "PAN validated, awaiting OTP verification.");
         response.put("extractedText", extractedPan);
         return ResponseEntity.ok(response);
     }

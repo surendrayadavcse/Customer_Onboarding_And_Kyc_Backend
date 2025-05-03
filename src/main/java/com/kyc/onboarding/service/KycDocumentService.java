@@ -113,7 +113,7 @@ public class KycDocumentService {
             throw new InvalidDocumentFormatException("Could not extract a valid PAN number from the image");
         }
 
-        logService.logAttempt(user, "PAN", "PENDING", "OCR validated, waiting for OTP verification");
+        logService.logAttempt(user, "PAN", "PENDING", "OCR 	, waiting for OTP verification");
 
         return validPan;
     }
