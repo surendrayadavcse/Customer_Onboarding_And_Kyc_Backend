@@ -1,6 +1,7 @@
 package com.kyc.onboarding.controller;
 
 import com.kyc.onboarding.dto.KycDocumentResponse;
+import com.kyc.onboarding.dto.SelfieResponse;
 import com.kyc.onboarding.service.KycDocumentService;
 
 import java.util.HashMap;
@@ -10,6 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 @RestController
 @RequestMapping("/api/kyc")
@@ -20,7 +24,7 @@ public class KycDocumentController {
 
 
     
-    @PostMapping("/uploadaadhar")
+    @PostMapping("/aadhar")
     public ResponseEntity<Map<String, String>> uploadAadhar(
             @RequestParam("userId") int userId,
             @RequestParam("file") MultipartFile aadharImage) {
@@ -34,7 +38,7 @@ public class KycDocumentController {
     }
 
 
-    @PostMapping("/uploadpan")
+    @PostMapping("/pan")
     public ResponseEntity<Map<String, String>> uploadPan(
             @RequestParam("userId") int userId,
             @RequestParam("file") MultipartFile panImage) {
@@ -50,7 +54,7 @@ public class KycDocumentController {
 
 
 
-    @PostMapping("/uploadselfie")
+    @PostMapping("/selfie")
     public ResponseEntity<String> uploadSelfie(
             @RequestParam("userId") int userId,
             @RequestParam("file") MultipartFile selfieImage) {
@@ -60,10 +64,19 @@ public class KycDocumentController {
                 ? ResponseEntity.ok("Selfie uploaded successfully!")
                 : ResponseEntity.badRequest().body("Failed to upload selfie.");
     }
-    @GetMapping("/getKycDetails/{userId}")
+    @GetMapping("/documentsdata/{userId}")
     public ResponseEntity<KycDocumentResponse> getKycDetails(@PathVariable("userId") int userId) {
         KycDocumentResponse response = kycDocumentService.getKycDocument(userId);
         return ResponseEntity.ok(response);
     }
+   
+     @GetMapping("/selfie/{userId}")
+     public ResponseEntity<String> getselfie(@PathVariable("userId") int userId) {
+         String response=kycDocumentService.getSelfie(userId);
+         return ResponseEntity.ok(response);
+     }
+     
+    
+    
 
 }

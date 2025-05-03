@@ -38,11 +38,12 @@ public class UserController {
                 "id", user.getId(),
                 "token", token,
                 "role", user.getRole(),
+                "fullName",user.getFullName(),
                 "kycstatus", user.getKycStatus()
         ));
     }
     
-    @PatchMapping("/uploadbasicdetails")
+    @PatchMapping("/basicdetails")
     public ResponseEntity<String> updateUserDetails(@RequestBody User user) {
         userService.updateUserDetails(user);
         return ResponseEntity.ok("User details updated successfully.");

@@ -1,12 +1,15 @@
 package com.kyc.onboarding.service;
 
 import com.kyc.onboarding.dto.KycDocumentResponse;
+import com.kyc.onboarding.dto.SelfieResponse;
 import com.kyc.onboarding.exception.*;
 import com.kyc.onboarding.model.KycDocument;
 import com.kyc.onboarding.model.User;
 import com.kyc.onboarding.ocr.OcrService;
 import com.kyc.onboarding.repository.KycDocumentsRepository;
 import com.kyc.onboarding.repository.UserRepository;
+import com.kyc.onboarding.security.EncryptionUtil;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -73,7 +76,11 @@ public class KycDocumentService {
     }
 
     kyc.setAadharImage(filePath.toString());
-    kyc.setAadharNumber(uploadAadhar(user.getId(), aadharImage));
+    String aadharNumber = uploadAadhar(user.getId(), aadharImage);
+    String encryptedAadhar = EncryptionUtil.encrypt(aadharNumber); // Encrypt here
+    kyc.setAadharNumber(encryptedAadhar); // Store encrypted value
+
+//    kyc.setAadharNumber(uploadAadhar(user.getId(), aadharImage));
     kycDocumentRepository.save(kyc);
 
     logService.logAttempt(user, "AADHAR", "SUCCESS", "Aadhar verified via OTP");
@@ -130,7 +137,9 @@ public class KycDocumentService {
         }
 
         kyc.setPanImage(filePath.toString());
-        kyc.setPanNumber(uploadPan(user.getId(), panImage)); // Store PAN number as well
+        String panNumber = uploadPan(user.getId(), panImage);
+        String encryptedPan = EncryptionUtil.encrypt(panNumber); // Encrypt here
+        kyc.setPanNumber(encryptedPan); // Store PAN number as well
         kycDocumentRepository.save(kyc);
 
         logService.logAttempt(user, "PAN", "SUCCESS", "PAN verified and saved");
@@ -251,13 +260,31 @@ public class KycDocumentService {
 
         // Return the KycDocumentResponse with the fully qualified URLs
         return new KycDocumentResponse(
-            document.getAadharNumber(),
+        		EncryptionUtil.decrypt(document.getAadharNumber()),
             baseUrl + normalizedAadharPath,
-            document.getPanNumber(),
+            EncryptionUtil.decrypt(document.getPanNumber()),
             baseUrl + normalizedPanPath
         );
     }
 
+
+  
+
+
+	public String getSelfie(int userId) {
+		KycDocument document = kycDocumentRepository.findByUserId(userId)
+	            .orElseThrow(() -> new KycDocumentNotFoundException("KYC document not found for user ID: " + userId));
+	 String baseUrl = "http://localhost:9999/";
+
+     // Normalize the paths to ensure proper file structure
+     String normalizedSelfiePath= document.getSelfieImage().replace("\\", "/");
+     return baseUrl+ normalizedSelfiePath;
+		// TODO Auto-generated method stub
+	
+	}
+    
+    
+ 
 
 
 

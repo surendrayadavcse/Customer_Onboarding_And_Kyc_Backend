@@ -8,6 +8,7 @@ import com.kyc.onboarding.model.KycDocument;
 import com.kyc.onboarding.model.User;
 import com.kyc.onboarding.repository.KycDocumentsRepository;
 import com.kyc.onboarding.repository.UserRepository;
+import com.kyc.onboarding.security.EncryptionUtil;
 import com.kyc.onboarding.security.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -163,9 +164,9 @@ public class UserService {
         dto.setAddress(user.getAddress());
 
         optionalKycDocument.ifPresent(kycDocument -> {
-            dto.setAadharNumber(kycDocument.getAadharNumber());
+            dto.setAadharNumber(EncryptionUtil.decrypt(kycDocument.getAadharNumber()));
             dto.setAadharImage(kycDocument.getAadharImage());
-            dto.setPanNumber(kycDocument.getPanNumber());
+            dto.setPanNumber(EncryptionUtil.decrypt(kycDocument.getPanNumber()));
             dto.setPanImage(kycDocument.getPanImage());
             dto.setSelfieImage(kycDocument.getSelfieImage());
         });
