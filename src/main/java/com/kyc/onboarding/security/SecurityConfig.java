@@ -1,6 +1,6 @@
 package com.kyc.onboarding.security;
 
-import com.kyc.onboarding.repository.FinancialServiceRepository;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -22,7 +22,7 @@ public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
 
-    public SecurityConfig(FinancialServiceRepository repo, JwtAuthFilter jwtAuthFilter) {
+    public SecurityConfig( JwtAuthFilter jwtAuthFilter) {
         this.jwtAuthFilter = jwtAuthFilter;
     }
 

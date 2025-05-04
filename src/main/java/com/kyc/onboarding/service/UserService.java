@@ -1,5 +1,6 @@
 package com.kyc.onboarding.service;
 
+import com.kyc.onboarding.constants.KycStatus;
 import com.kyc.onboarding.dto.AddressDobDTO;
 import com.kyc.onboarding.dto.CustomerDTO;
 import com.kyc.onboarding.dto.UserProfileResponseDTO;
@@ -64,47 +65,46 @@ public class UserService {
         return userRepository.findAllCustomers();
     }
 
-    public void checkAndUpdateKycStatus(User user) {
-        if (user == null) {
-            throw new IllegalArgumentException("User cannot be null");
-        }
-
-        boolean updated = false;
-
-        if (user.getAddress() != null && user.getDob() != null && !"STEP 1 COMPLETED".equals(user.getKycStatus())) {
-            user.setKycStatus("STEP 1 COMPLETED");
-            updated = true;
-        }
-
-        if (user.getKycDocument() == null) {
-            userRepository.save(user);
-            return;
-        }
-
-        boolean aadharSuccess = verificationLogService.hasSuccessfulVerification(user.getId(), "AADHAR");
-        boolean panSuccess = verificationLogService.hasSuccessfulVerification(user.getId(), "PAN");
-        boolean selfieSuccess = verificationLogService.hasSuccessfulVerification(user.getId(), "SELFIE");
-
-        if (aadharSuccess && panSuccess &&
-        	    user.getKycDocument().getAadharNumber() != null &&
-        	    user.getKycDocument().getPanNumber() != null &&
-        	    !"STEP 2 COMPLETED".equals(user.getKycStatus()) &&
-        	    !"KYC COMPLETED".equals(user.getKycStatus())) {
-        	    
-        	    user.setKycStatus("STEP 2 COMPLETED");
-        	    updated = true;
-        	}
-
-
-        if (selfieSuccess && !"KYC COMPLETED".equals(user.getKycStatus())) {
-            user.setKycStatus("KYC COMPLETED");
-            updated = true;
-        }
-
-        if (updated) {
-            userRepository.save(user);
-        }
+public void checkAndUpdateKycStatus(User user) {
+    if (user == null) {
+        throw new IllegalArgumentException("User cannot be null");
     }
+
+    boolean updated = false;
+
+    if (user.getAddress() != null && user.getDob() != null && !KycStatus.STEP1_COMPLETED.equals(user.getKycStatus())) {
+        user.setKycStatus(KycStatus.STEP1_COMPLETED);
+        updated = true;
+    }
+
+    if (user.getKycDocument() == null) {
+        userRepository.save(user);
+        return;
+    }
+
+    boolean aadharSuccess = verificationLogService.hasSuccessfulVerification(user.getId(), "AADHAR");
+    boolean panSuccess = verificationLogService.hasSuccessfulVerification(user.getId(), "PAN");
+    boolean selfieSuccess = verificationLogService.hasSuccessfulVerification(user.getId(), "SELFIE");
+
+    if (aadharSuccess && panSuccess &&
+            user.getKycDocument().getAadharNumber() != null &&
+            user.getKycDocument().getPanNumber() != null &&
+            !KycStatus.STEP2_COMPLETED.equals(user.getKycStatus()) &&
+            !KycStatus.KYC_COMPLETED.equals(user.getKycStatus())) {
+
+        user.setKycStatus(KycStatus.STEP2_COMPLETED);
+        updated = true;
+    }
+
+    if (selfieSuccess && !KycStatus.KYC_COMPLETED.equals(user.getKycStatus())) {
+        user.setKycStatus(KycStatus.KYC_COMPLETED);
+        updated = true;
+    }
+
+    if (updated) {
+        userRepository.save(user);
+    }
+}
 
     public void updateUserDetails(User user) {
         User existingUser = userRepository.findById(user.getId())
@@ -128,24 +128,25 @@ public class UserService {
         }
     }
 
-    public Map<String, Long> getKycStatistics() {
-        long totalUsers = userRepository.count();
-        long step1CompletedUsers = userRepository.countByKycStatus("STEP 1 COMPLETED");
-        long step2CompletedUsers = userRepository.countByKycStatus("STEP 2 COMPLETED");
-        long kycCompletedUsers = userRepository.countByKycStatus("KYC COMPLETED");
-        long pendingUsers = totalUsers - kycCompletedUsers;
-        long newRegistrations = userRepository.countTodayRegisteredUsers();
+   public Map<String, Long> getKycStatistics() {
+    long totalCustomers = userRepository.countByRole("CUSTOMER");
+    long step1CompletedCustomers = userRepository.countByRoleAndKycStatus("CUSTOMER", "STEP 1 COMPLETED");
+    long step2CompletedCustomers = userRepository.countByRoleAndKycStatus("CUSTOMER", "STEP 2 COMPLETED");
+    long kycCompletedCustomers = userRepository.countByRoleAndKycStatus("CUSTOMER", "KYC COMPLETED");
+    long pendingCustomers = totalCustomers - kycCompletedCustomers;
+    long newCustomerRegistrations = userRepository.countTodayRegisteredUsers();
 
-        Map<String, Long> stats = new HashMap<>();
-        stats.put("totalUsers", totalUsers);
-        stats.put("step1CompletedUsers", step1CompletedUsers);
-        stats.put("step2CompletedUsers", step2CompletedUsers);
-        stats.put("kycCompletedUsers", kycCompletedUsers);
-        stats.put("pendingUsers", pendingUsers);
-        stats.put("newRegistrations", newRegistrations); // ✅ added here
+    Map<String, Long> stats = new HashMap<>();
+    stats.put("totalUsers", totalCustomers);
+    stats.put("step1CompletedCustomers", step1CompletedCustomers);
+    stats.put("step2CompletedCustomers", step2CompletedCustomers);
+    stats.put("kycCompletedUsers", kycCompletedCustomers);
+    stats.put("pendingUsers", pendingCustomers);
+    stats.put("newRegistrations", newCustomerRegistrations);
 
-        return stats;
-    }
+    return stats;
+}
+
 
     public UserProfileResponseDTO getUserProfile(int userId) {
         User user = userRepository.findById(userId)
@@ -180,12 +181,12 @@ public class UserService {
         return user.getKycStatus();
     }
 
-	public String getemailbyid(Integer userId) {
+	
+    public String getemailbyid(Integer userId) {
 		// TODO Auto-generated method stub
-		Optional<User> userOpt=userRepository.findById(userId);
-		
-		User user = userOpt.get();
-		return user.getEmail();
+		  User user = userRepository.findById(userId)
+			        .orElseThrow(() -> new UserNotFoundException("User not found with ID: " + userId));
+			    return user.getEmail();
 	}
 
 	public AddressDobDTO getAddressAndDob(int userId) {

@@ -80,7 +80,7 @@ public class KycDocumentService {
     String encryptedAadhar = EncryptionUtil.encrypt(aadharNumber); // Encrypt here
     kyc.setAadharNumber(encryptedAadhar); // Store encrypted value
 
-//    kyc.setAadharNumber(uploadAadhar(user.getId(), aadharImage));
+
     kycDocumentRepository.save(kyc);
 
     logService.logAttempt(user, "AADHAR", "SUCCESS", "Aadhar verified via OTP");
@@ -218,7 +218,7 @@ public class KycDocumentService {
                    .replaceAll("[^a-z0-9 /]", "")        // Remove punctuation
                    .trim();
 
-        System.out.println("Normalized Aadhar OCR: " + text);
+       
 
         boolean hasGov = text.contains("government of india") || text.contains("govt of india") || text.contains("india");
         boolean hasAadhar = text.contains("aadhaar") || text.contains("unique identification");
@@ -254,9 +254,7 @@ public class KycDocumentService {
         String normalizedAadharPath = document.getAadharImage().replace("\\", "/");
         String normalizedPanPath = document.getPanImage().replace("\\", "/");
 
-        // Optionally log the normalized paths for debugging
-        System.out.println("Normalized Aadhaar Path: " + normalizedAadharPath);
-        System.out.println("Normalized PAN Path: " + normalizedPanPath);
+     
 
         // Return the KycDocumentResponse with the fully qualified URLs
         return new KycDocumentResponse(
@@ -279,7 +277,7 @@ public class KycDocumentService {
      // Normalize the paths to ensure proper file structure
      String normalizedSelfiePath= document.getSelfieImage().replace("\\", "/");
      return baseUrl+ normalizedSelfiePath;
-		// TODO Auto-generated method stub
+	
 	
 	}
     

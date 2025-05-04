@@ -33,7 +33,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             String token = authHeader.substring(7);
             try {
                 String email = jwtUtil.extractEmail(token);
-                String role = jwtUtil.extractRole(token);
+              
 
                 UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
                         email, null, Collections.emptyList()

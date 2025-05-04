@@ -80,7 +80,7 @@ class ConsentServiceTest {
         consent.setConsentGiven(true);
         when(consentRepository.findByUserId(1)).thenReturn(consent);
 
-        Boolean result = consentService.getConsentStatus(2);  //org 1
+        Boolean result = consentService.getConsentStatus(1);  //org 1
 
         assertTrue(result);
     }

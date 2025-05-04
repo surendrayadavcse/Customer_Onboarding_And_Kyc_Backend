@@ -21,11 +21,11 @@ public class OTPService {
     
     @Autowired
     KycDocumentService kycService;
-
+    private static final Random RANDOM = new Random(); // ✅ Reused Random instance
     // Method to generate and send OTP
     public void generateAndSendOTP(String email) {
         // Generate a random OTP
-        String otp = String.valueOf(new Random().nextInt(9000) + 1000);
+    	String otp = String.valueOf(RANDOM.nextInt(9000) + 1000); // ✅ Use static instance
 
         // Store OTP in Redis with a -second expiry
         redisTemplate.opsForValue().set(email, otp, 300, TimeUnit.SECONDS);

@@ -9,7 +9,7 @@ import jakarta.persistence.JoinColumn;
 
 import jakarta.persistence.ManyToOne;
 
-//package com.kyc.onboarding.model;
+
 
 import jakarta.persistence.*;
 
