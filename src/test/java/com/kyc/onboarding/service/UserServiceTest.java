@@ -5,6 +5,7 @@ import com.kyc.onboarding.model.KycDocument;
 import com.kyc.onboarding.model.User;
 import com.kyc.onboarding.repository.KycDocumentsRepository;
 import com.kyc.onboarding.repository.UserRepository;
+import com.kyc.onboarding.security.EncryptionUtil;
 import com.kyc.onboarding.security.JwtUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -77,32 +78,46 @@ class UserServiceTest {
         assertEquals("mockJwt", token);
     }
 
-//    @Test
-//    void testGetUserProfile_Success() {
-//        User user = new User();
-//        user.setId(1);
-//        user.setFullName("John Doe");
-//        user.setEmail("john@example.com");
-//        user.setRole("CUSTOMER");
-//        user.setMobile("1234567890");
-//        user.setKycStatus("KYC COMPLETED");
-//        user.setDob(LocalDate.of(1990, 1, 1));
-//        user.setAddress("123 Street");
-//
-//        KycDocument doc = new KycDocument();
-//        doc.setAadharNumber("123412341234");
-//        doc.setPanNumber("ABCDE1234F");
-//
-//        when(userRepository.findById(1)).thenReturn(Optional.of(user));
-//        when(kycDocumentsRepository.findByUserId(1)).thenReturn(doc);
-//
-//        UserProfileResponseDTO dto = userService.getUserProfile(1);
-//
-//        assertEquals("John Doe", dto.getFullName());
-//        assertEquals("123412341234", dto.getAadharNumber());
-//        assertEquals("ABCDE1234F", dto.getPanNumber());
-//    }
+ 
+ @Test
+    void testGetUserProfile_Success() {
+        // Mock User
+        User user = new User();
+        user.setId(1);
+        user.setFullName("John Doe");
+        user.setEmail("john@example.com");
+        user.setRole("CUSTOMER");
+        user.setMobile("1234567890");
+        user.setKycStatus("KYC COMPLETED");
+        user.setDob(LocalDate.of(1990, 1, 1));
+        user.setAddress("123 Street");
 
+        // Mock KYC Document with encrypted values
+        KycDocument doc = new KycDocument();
+        doc.setAadharNumber("encryptedAadhar");
+        doc.setPanNumber("encryptedPan");
+        doc.setAadharImage("aadharImage.jpg");
+        doc.setPanImage("panImage.jpg");
+        doc.setSelfieImage("selfieImage.jpg");
+
+        when(userRepository.findById(1)).thenReturn(Optional.of(user));
+        when(kycDocumentsRepository.findByUserId(1)).thenReturn(Optional.of(doc));
+
+        // Mock static EncryptionUtil.decrypt method
+        try (MockedStatic<EncryptionUtil> mockedStatic = mockStatic(EncryptionUtil.class)) {
+            mockedStatic.when(() -> EncryptionUtil.decrypt("encryptedAadhar")).thenReturn("123412341234");
+            mockedStatic.when(() -> EncryptionUtil.decrypt("encryptedPan")).thenReturn("ABCDE1234F");
+
+            UserProfileResponseDTO dto = userService.getUserProfile(1);
+
+            assertEquals("John Doe", dto.getFullName());
+            assertEquals("123412341234", dto.getAadharNumber());
+            assertEquals("ABCDE1234F", dto.getPanNumber());
+            assertEquals("aadharImage.jpg", dto.getAadharImage());
+            assertEquals("panImage.jpg", dto.getPanImage());
+            assertEquals("selfieImage.jpg", dto.getSelfieImage());
+        }
+    }
     @Test
     void testGetKycStatusByUserId_Success() {
         User user = new User();

@@ -19,79 +19,69 @@ import org.springframework.web.multipart.MultipartFile;
 
 
 //@CrossOrigin(origins = "http://localhost:5173")
+
+
 @RestController
 @RequestMapping("/api")
 public class OTPController {
 
-    @Autowired
-    private OTPService otpService;
+    private final UserRepository userRepository;
+    private final OTPService otpService;
 
-    @Autowired
-    private UserService userService;
+    // Constants defined inside the same component
+    private static final String MESSAGE = "message";
+    private static final String EMAIL_ALREADY_REGISTERED = "User already registered with this email";
+    private static final String MOBILE_ALREADY_REGISTERED = "User already registered with this mobile number";
+    private static final String OTP_SENT = "OTP sent to ";
+    private static final String OTP_VERIFIED = "OTP verified successfully";
+    private static final String INVALID_OTP = "Invalid OTP";
 
-    @Autowired
-    private UserRepository userRepository;
+    public OTPController(UserRepository userRepository, OTPService otpService) {
+        this.userRepository = userRepository;
+        this.otpService = otpService;
+    }
 
     @GetMapping("/getOTP/{email}")
     public ResponseEntity<?> getOtp(@PathVariable String email, @RequestParam String mobile) {
         if (userRepository.findByEmail(email).isPresent()) {
-            return ResponseEntity.status(400).body(Map.of("message", "User already registered with this email"));
+            return ResponseEntity.status(400).body(Map.of(MESSAGE, EMAIL_ALREADY_REGISTERED));
         }
-
         if (userRepository.findByMobile(mobile).isPresent()) {
-            return ResponseEntity.status(400).body(Map.of("message", "User already registered with this mobile number"));
+            return ResponseEntity.status(400).body(Map.of(MESSAGE, MOBILE_ALREADY_REGISTERED));
         }
-
         otpService.generateAndSendOTP(email);
-        return ResponseEntity.ok(Map.of("message", "OTP sent to " + email));
+        return ResponseEntity.ok(Map.of(MESSAGE, OTP_SENT + email));
     }
 
-
-    // Endpoint to verify the OTP entered by the user
     @PostMapping("/verifyOTP")
     public ResponseEntity<?> verifyOtp(@RequestBody OTPVerificationRequest otpVerificationRequest) {
         boolean isVerified = otpService.verifyOTP(otpVerificationRequest.getEmail(), otpVerificationRequest.getOtp());
-        if (isVerified) {
-            return ResponseEntity.ok(Map.of("message", "OTP verified successfully"));
-        } else {
-            return ResponseEntity.status(400).body(Map.of("message", "Invalid OTP"));
-        }
+        return isVerified
+                ? ResponseEntity.ok(Map.of(MESSAGE, OTP_VERIFIED))
+                : ResponseEntity.status(400).body(Map.of(MESSAGE, INVALID_OTP));
     }
-    
+
     @GetMapping("/getotpfordoc/{email}")
     public ResponseEntity<?> getOtpfordoc(@PathVariable String email) {
-        
-
         otpService.generateAndSendOTP(email);
-        return ResponseEntity.ok(Map.of("message", "OTP sent to " + email));
+        return ResponseEntity.ok(Map.of(MESSAGE, OTP_SENT + email));
     }
+
     @PostMapping("/verifyotpfordoc")
-    public ResponseEntity<?> verifyotpdoc(@RequestParam Integer userId,@RequestParam String otp, MultipartFile aadharImage) {
-    	
-    	Optional<User> userOpt= userRepository.findById(userId);
-    	
-    	User user = userOpt.get();
-    	
+    public ResponseEntity<?> verifyotpdoc(@RequestParam Integer userId, @RequestParam String otp, MultipartFile aadharImage) {
+        User user = userRepository.findById(userId).orElseThrow();
         boolean isVerified = otpService.aadharVerifyOTP(user.getEmail(), otp, aadharImage);
-        if (isVerified) {
-            return ResponseEntity.ok(Map.of("message", "OTP verified successfully"));
-        } else {
-            return ResponseEntity.status(400).body(Map.of("message", "Invalid OTP"));
-        }
+        return isVerified
+                ? ResponseEntity.ok(Map.of(MESSAGE, OTP_VERIFIED))
+                : ResponseEntity.status(400).body(Map.of(MESSAGE, INVALID_OTP));
     }
+
     @PostMapping("/verifyotpforpan")
-    public ResponseEntity<?> verifypanotp(@RequestParam Integer userId,@RequestParam String otp, MultipartFile panImage) {
-    	
-    	Optional<User> userOpt= userRepository.findById(userId);
-    	
-    	User user = userOpt.get();
-    	
+    public ResponseEntity<?> verifypanotp(@RequestParam Integer userId, @RequestParam String otp, MultipartFile panImage) {
+        User user = userRepository.findById(userId).orElseThrow();
         boolean isVerified = otpService.verifyPanOtp(user.getEmail(), otp, panImage);
-        if (isVerified) {
-            return ResponseEntity.ok(Map.of("message", "OTP verified successfully"));
-        } else {
-            return ResponseEntity.status(400).body(Map.of("message", "Invalid OTP"));
-        }
+        return isVerified
+                ? ResponseEntity.ok(Map.of(MESSAGE, OTP_VERIFIED))
+                : ResponseEntity.status(400).body(Map.of(MESSAGE, INVALID_OTP));
     }
-   
 }

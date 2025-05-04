@@ -2,6 +2,8 @@ package com.kyc.onboarding.ocr;
 
 import net.sourceforge.tess4j.Tesseract;
 import net.sourceforge.tess4j.TesseractException;
+
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -35,12 +37,15 @@ public class OcrService {
             try {
                 // Perform OCR on the image
                 return tesseract.doOCR(tempFile);
-            } finally {
-                // Delete temp file
-                tempFile.delete();
+            } 
+            
+            finally {
+                if (!tempFile.delete()) {
+                    LoggerFactory.getLogger(getClass()).warn("Failed to delete temporary file: {}", tempFile.getAbsolutePath());
+                }
             }
-
-        } catch (TesseractException e) {
+        }
+         catch (TesseractException e) {
             throw new RuntimeException("OCR processing failed: " + e.getMessage(), e);
         } catch (IOException e) {
             throw new RuntimeException("Failed to convert MultipartFile to File: " + e.getMessage(), e);

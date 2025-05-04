@@ -1,12 +1,14 @@
 package com.kyc.onboarding.constants;
 
+public final class KycStatus {
 
+    public static final String PENDING = "PENDING";
+    public static final String  STEP1_COMPLETED= "STEP 1 COMPLETED";
+    public static final String STEP2_COMPLETED = "STEP 2 COMPLETED";
+    public static final String KYC_COMPLETED = "KYC COMPLETED";
 
-public class KycStatus {
-    public static final String NOT_STARTED = "NOT_STARTED";
-    public static final String IN_PROGRESS = "IN_PROGRESS";
-    public static final String VERIFIED = "VERIFIED";
-    public static final String REJECTED = "REJECTED";
+    // Private constructor to prevent instantiation
+    private KycStatus() {
+        throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
+    }
 }
-
- 

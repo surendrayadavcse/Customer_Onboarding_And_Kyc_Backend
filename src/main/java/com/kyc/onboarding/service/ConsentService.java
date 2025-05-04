@@ -15,6 +15,9 @@ import java.time.LocalDateTime;
 @Service
 public class ConsentService {
 
+    private static final String USER_NOT_FOUND_MSG = "User with id ";
+    private static final String USER_NOT_FOUND_SUFFIX = " not found";
+
     @Autowired
     private UserRepository userRepository;
 
@@ -22,9 +25,11 @@ public class ConsentService {
     private ConsentRepository consentRepository;
 
     public Consent submitConsent(int userId, boolean consentGiven) {
+        // Check if the user exists
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("User with id " + userId + " not found"));
+                .orElseThrow(() -> new UserNotFoundException(USER_NOT_FOUND_MSG + userId + USER_NOT_FOUND_SUFFIX));
 
+        // Retrieve or create the consent
         Consent consent = consentRepository.findByUserId(userId);
         if (consent == null) {
             consent = new Consent();
@@ -33,22 +38,22 @@ public class ConsentService {
 
         consent.setConsentGiven(consentGiven);
         consent.setCompletedAt(LocalDateTime.now());
-
+        
+        // Save consent and return
         return consentRepository.save(consent);
     }
-    public Boolean getConsentStatus(int userId) {
-        // First, check if the user exists
-        userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("User with id " + userId + " not found"));
 
-        // Then check if consent exists
+    public Boolean getConsentStatus(int userId) {
+        // Check if the user exists
+        userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(USER_NOT_FOUND_MSG + userId + USER_NOT_FOUND_SUFFIX));
+
+        // Check if consent exists
         Consent consent = consentRepository.findByUserId(userId);
         if (consent == null) {
-            throw new UserNotFoundException("User with id " + userId + " not found");
+            throw new UserNotFoundException(USER_NOT_FOUND_MSG + userId + USER_NOT_FOUND_SUFFIX);
         }
 
         return consent.isConsentGiven();
     }
-
-
 }

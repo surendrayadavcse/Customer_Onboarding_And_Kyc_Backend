@@ -8,9 +8,6 @@ import java.io.File;
 
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
-
-//    private static final String UPLOAD_DIR = System.getProperty("user.dir") + File.separator + "uploadeddoc";
-
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         String uploadDir = System.getProperty("user.dir") + File.separator + "uploads";
