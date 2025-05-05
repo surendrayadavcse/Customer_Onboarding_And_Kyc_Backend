@@ -41,6 +41,7 @@ public class SecurityConfig {
         http
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable())
+            .formLogin(form -> form.disable()) //Disabled default login form and generated password
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("api/user/register", "api/user/login", "/api/user/kycstatus/**","/api/services/all","api/getOTP/**","api/verifyOTP","api/user/kycstatus/**","/uploads/**","/api/forgotpassword/**").permitAll()
                 .anyRequest().authenticated()

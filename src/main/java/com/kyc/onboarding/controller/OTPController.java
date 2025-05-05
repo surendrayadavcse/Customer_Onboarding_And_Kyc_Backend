@@ -73,7 +73,7 @@ public class OTPController {
     
     @GetMapping("/getotpforpan/{email}")
     public ResponseEntity<?> getOtpforpan(@PathVariable String email) {
-        otpService.generateAndSendOTP(email,"pa");
+        otpService.generateAndSendOTP(email,"pan");
         return ResponseEntity.ok(Map.of(MESSAGE, OTP_SENT + email));
     }
 
@@ -101,7 +101,7 @@ public class OTPController {
         if (userOpt.isEmpty()) {
             return ResponseEntity.status(404).body(Map.of("message", "Email not registered"));
         }
-        otpService.generateAndSendOTP(email, "forgotpassword");
+        otpService.generateAndSendOTP(email,"forgotpassword");
         return ResponseEntity.ok(Map.of("message", "OTP sent to " + email));
     }
     @PostMapping("/forgotpassword/verifyotp")

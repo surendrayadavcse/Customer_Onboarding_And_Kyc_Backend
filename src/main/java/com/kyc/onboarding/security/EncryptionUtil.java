@@ -12,7 +12,9 @@ import java.util.Base64;
 public class EncryptionUtil {
     private static final String ALGORITHM = "AES";
     private static final String CIPHER_TRANSFORMATION = "AES/GCM/NoPadding";
-    private static final String KEY = System.getenv("ENCRYPTION_KEY"); // Fetch key from environment variable
+    private static final String KEY = System.getenv("ENCRYPTION_KEY") != null 
+    	    ? System.getenv("ENCRYPTION_KEY") 
+    	    : "MySecretKey12345";
     private EncryptionUtil() {
         throw new UnsupportedOperationException("EncryptionUtil is a utility class and cannot be instantiated.");
     }
