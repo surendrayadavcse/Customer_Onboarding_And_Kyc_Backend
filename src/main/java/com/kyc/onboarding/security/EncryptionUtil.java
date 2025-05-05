@@ -16,7 +16,7 @@ public class EncryptionUtil {
     private EncryptionUtil() {
         throw new UnsupportedOperationException("EncryptionUtil is a utility class and cannot be instantiated.");
     }
-    // Ensure the key length is 16 bytes (128-bit AES)
+
     private static final int GCM_TAG_LENGTH = 16; // GCM tag length in bytes
 
     public static String encrypt(String data) {
@@ -27,11 +27,11 @@ public class EncryptionUtil {
 
             SecretKeySpec secretKey = new SecretKeySpec(KEY.getBytes(), ALGORITHM);
 
-            // Generate a random 12-byte IV for AES/GCM (recommended size for GCM)
+            // Generate a random 12-byte IV for AES/GCM 
             byte[] iv = new byte[12];
             SecureRandom random = new SecureRandom();
             random.nextBytes(iv);
-            GCMParameterSpec gcmParameterSpec = new GCMParameterSpec(GCM_TAG_LENGTH * 8, iv); // GCM tag length in bits
+            GCMParameterSpec gcmParameterSpec = new GCMParameterSpec(GCM_TAG_LENGTH * 8, iv);
 
             Cipher cipher = Cipher.getInstance(CIPHER_TRANSFORMATION);
             cipher.init(Cipher.ENCRYPT_MODE, secretKey, gcmParameterSpec);

@@ -243,25 +243,55 @@ public class KycDocumentService {
         return hasGov && hasPan && hasName;
     }
 
+//    public KycDocumentResponse getKycDocument(int userId) {
+//        KycDocument document = kycDocumentRepository.findByUserId(userId)
+//            .orElseThrow(() -> new KycDocumentNotFoundException("KYC document not found for user ID: " + userId));
+//
+//        // The base URL for serving the uploaded files
+//        String baseUrl = "http://localhost:9999/";
+//
+//        // Normalize the paths to ensure proper file structure
+//        String normalizedAadharPath = document.getAadharImage().replace("\\", "/");
+//        String normalizedPanPath = document.getPanImage().replace("\\", "/");
+//
+//     
+//
+//        // Return the KycDocumentResponse with the fully qualified URLs
+//        return new KycDocumentResponse(
+//        		EncryptionUtil.decrypt(document.getAadharNumber()),
+//            baseUrl + normalizedAadharPath,
+//            EncryptionUtil.decrypt(document.getPanNumber()),
+//            baseUrl + normalizedPanPath
+//        );
+//    }
+
+    
     public KycDocumentResponse getKycDocument(int userId) {
         KycDocument document = kycDocumentRepository.findByUserId(userId)
             .orElseThrow(() -> new KycDocumentNotFoundException("KYC document not found for user ID: " + userId));
 
-        // The base URL for serving the uploaded files
         String baseUrl = "http://localhost:9999/";
 
-        // Normalize the paths to ensure proper file structure
-        String normalizedAadharPath = document.getAadharImage().replace("\\", "/");
-        String normalizedPanPath = document.getPanImage().replace("\\", "/");
+        String aadharNumber = null;
+        String aadharImageUrl = null;
+        String panNumber = null;
+        String panImageUrl = null;
 
-     
+        if (document.getAadharNumber() != null && document.getAadharImage() != null) {
+            aadharNumber = EncryptionUtil.decrypt(document.getAadharNumber());
+            aadharImageUrl = baseUrl + document.getAadharImage().replace("\\", "/");
+        }
 
-        // Return the KycDocumentResponse with the fully qualified URLs
+        if (document.getPanNumber() != null && document.getPanImage() != null) {
+            panNumber = EncryptionUtil.decrypt(document.getPanNumber());
+            panImageUrl = baseUrl + document.getPanImage().replace("\\", "/");
+        }
+
         return new KycDocumentResponse(
-        		EncryptionUtil.decrypt(document.getAadharNumber()),
-            baseUrl + normalizedAadharPath,
-            EncryptionUtil.decrypt(document.getPanNumber()),
-            baseUrl + normalizedPanPath
+            aadharNumber,
+            aadharImageUrl,
+            panNumber,
+            panImageUrl
         );
     }
 

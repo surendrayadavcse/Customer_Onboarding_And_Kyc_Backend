@@ -38,7 +38,7 @@ class OTPServiceTest {
         String email = "user@example.com";
 
         // Act
-        otpService.generateAndSendOTP(email);
+        otpService.generateAndSendOTP(email,"aadhar");
 
         // Assert Redis set with expiry
         verify(valueOperations, times(1)).set(eq(email), anyString(), eq(300L), eq(TimeUnit.SECONDS));
