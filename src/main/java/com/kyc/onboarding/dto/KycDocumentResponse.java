@@ -1,5 +1,8 @@
 package com.kyc.onboarding.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class KycDocumentResponse {
 
     private String aadharNumber;
@@ -9,7 +12,7 @@ public class KycDocumentResponse {
 
     public KycDocumentResponse() {
     }
-
+   
     public KycDocumentResponse(String aadharNumber, String aadharImageUrl, String panNumber, String panImageUrl) {
         this.aadharNumber = aadharNumber;
         this.aadharImageUrl = aadharImageUrl;

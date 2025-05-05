@@ -1,6 +1,6 @@
-projectKey=SFS202
+projectKey=SFS203
 serverUrl=http://localhost:9797
 serverVersion=9.9.8.100196
-dashboardUrl=http://localhost:9797/dashboard?id=SFS202
-ceTaskId=AZabg1DTGDqLB8Je9H6Y
-ceTaskUrl=http://localhost:9797/api/ce/task?id=AZabg1DTGDqLB8Je9H6Y
+dashboardUrl=http://localhost:9797/dashboard?id=SFS203
+ceTaskId=AZae5JvZGDqLB8Je9H6i
+ceTaskUrl=http://localhost:9797/api/ce/task?id=AZae5JvZGDqLB8Je9H6i

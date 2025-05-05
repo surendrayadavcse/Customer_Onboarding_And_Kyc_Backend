@@ -14,6 +14,7 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -24,6 +25,8 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequestMapping("/api")
 public class OTPController {
+
+    private final PasswordEncoder passwordEncoder;
 
     private final UserRepository userRepository;
     private final OTPService otpService;
@@ -36,9 +39,10 @@ public class OTPController {
     private static final String OTP_VERIFIED = "OTP verified successfully";
     private static final String INVALID_OTP = "Invalid OTP";
 
-    public OTPController(UserRepository userRepository, OTPService otpService) {
+    public OTPController(UserRepository userRepository, OTPService otpService, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.otpService = otpService;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @GetMapping("/getOTP/{email}")
@@ -49,7 +53,7 @@ public class OTPController {
         if (userRepository.findByMobile(mobile).isPresent()) {
             return ResponseEntity.status(400).body(Map.of(MESSAGE, MOBILE_ALREADY_REGISTERED));
         }
-        otpService.generateAndSendOTP(email);
+        otpService.generateAndSendOTP(email,"register");
         return ResponseEntity.ok(Map.of(MESSAGE, OTP_SENT + email));
     }
 
@@ -63,7 +67,13 @@ public class OTPController {
 
     @GetMapping("/getotpfordoc/{email}")
     public ResponseEntity<?> getOtpfordoc(@PathVariable String email) {
-        otpService.generateAndSendOTP(email);
+        otpService.generateAndSendOTP(email,"aadhar");
+        return ResponseEntity.ok(Map.of(MESSAGE, OTP_SENT + email));
+    }
+    
+    @GetMapping("/getotpforpan/{email}")
+    public ResponseEntity<?> getOtpforpan(@PathVariable String email) {
+        otpService.generateAndSendOTP(email,"pan");
         return ResponseEntity.ok(Map.of(MESSAGE, OTP_SENT + email));
     }
 
@@ -84,4 +94,37 @@ public class OTPController {
                 ? ResponseEntity.ok(Map.of(MESSAGE, OTP_VERIFIED))
                 : ResponseEntity.status(400).body(Map.of(MESSAGE, INVALID_OTP));
     }
+    @PostMapping("/forgotpassword/sendotp")
+    public ResponseEntity<?> sendForgotPasswordOtp(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+        Optional<User> userOpt = userRepository.findByEmail(email);
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.status(404).body(Map.of("message", "Email not registered"));
+        }
+        otpService.generateAndSendOTP(email,"forgotpassword");
+        return ResponseEntity.ok(Map.of("message", "OTP sent to " + email));
+    }
+    @PostMapping("/forgotpassword/verifyotp")
+    public ResponseEntity<?> verifyForgotPasswordOtp(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+        String otp = request.get("otp");
+        String newPassword = request.get("newPassword");
+
+        Optional<User> userOpt = userRepository.findByEmail(email);
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.status(404).body(Map.of("message", "Email not registered"));
+        }
+
+        boolean isVerified = otpService.verifyOTP(email, otp);
+        if (!isVerified) {
+            return ResponseEntity.status(400).body(Map.of("message", "Invalid OTP"));
+        }
+
+        User user = userOpt.get();
+        user.setPassword(passwordEncoder.encode(newPassword)); // Ideally encode it with BCrypt
+        userRepository.save(user);
+
+        return ResponseEntity.ok(Map.of("message", "Password updated successfully"));
+    }
+
 }
