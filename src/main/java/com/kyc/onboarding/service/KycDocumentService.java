@@ -113,7 +113,7 @@ public class KycDocumentService {
             throw new InvalidDocumentFormatException("Could not extract a valid PAN number from the image");
         }
 
-        logService.logAttempt(user, "PAN", "PENDING", "OCR 	, waiting for OTP verification");
+        logService.logAttempt(user, "PAN", "PENDING", "OCR validated, waiting for OTP verification waiting for OTP verification");
 
         return validPan;
     }
@@ -243,27 +243,7 @@ public class KycDocumentService {
         return hasGov && hasPan && hasName;
     }
 
-//    public KycDocumentResponse getKycDocument(int userId) {
-//        KycDocument document = kycDocumentRepository.findByUserId(userId)
-//            .orElseThrow(() -> new KycDocumentNotFoundException("KYC document not found for user ID: " + userId));
-//
-//        // The base URL for serving the uploaded files
-//        String baseUrl = "http://localhost:9999/";
-//
-//        // Normalize the paths to ensure proper file structure
-//        String normalizedAadharPath = document.getAadharImage().replace("\\", "/");
-//        String normalizedPanPath = document.getPanImage().replace("\\", "/");
-//
-//     
-//
-//        // Return the KycDocumentResponse with the fully qualified URLs
-//        return new KycDocumentResponse(
-//        		EncryptionUtil.decrypt(document.getAadharNumber()),
-//            baseUrl + normalizedAadharPath,
-//            EncryptionUtil.decrypt(document.getPanNumber()),
-//            baseUrl + normalizedPanPath
-//        );
-//    }
+
 
     
     public KycDocumentResponse getKycDocument(int userId) {
