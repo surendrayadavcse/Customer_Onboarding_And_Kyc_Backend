@@ -43,7 +43,9 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .formLogin(form -> form.disable()) 
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("api/user/register", "api/user/login", "/api/user/kycstatus/**","/api/services/all","api/getOTP/**","api/verifyOTP","api/user/kycstatus/**","/uploads/**","/api/forgotpassword/**","api/consent/**").permitAll()
+                .requestMatchers("api/user/register", "api/user/login", "/api/user/kycstatus/**","/api/services/all","api/getOTP/**","api/verifyOTP","api/user/kycstatus/**","/uploads/**","/api/forgotpassword/**","api/consent/**", "/swagger-ui/**",
+                        "/v3/api-docs/**",
+                        "/swagger-resources/**").permitAll()
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
