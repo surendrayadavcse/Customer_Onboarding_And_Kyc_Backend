@@ -3,7 +3,6 @@ pipeline {
 
     environment {
         IMAGE_NAME = 'surendracse/customerkyc'
-        DOCKER_CREDENTIALS_ID = '8f97f107-bbc2-401c-a703-e9b1b3153ae7'
     }
 
     stages {
@@ -15,13 +14,13 @@ pipeline {
 
         stage('Build') {
             steps {
-                bat '.\\mvnw.cmd clean package -DskipTests=false'
+                sh './mvnw clean package -DskipTests=false'
             }
         }
 
         stage('Test') {
             steps {
-                bat '.\\mvnw.cmd test'
+                sh './mvnw test'
             }
         }
 
@@ -36,7 +35,7 @@ pipeline {
         stage('Docker Push') {
             steps {
                 script {
-                    docker.withRegistry('https://index.docker.io/v1/', "${DOCKER_CREDENTIALS_ID}") {
+                    docker.withRegistry('https://index.docker.io/v1/', '8f97f107-bbc2-401c-a703-e9b1b3153ae7') {
                         dockerImage.push()
                     }
                 }
