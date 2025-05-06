@@ -3,6 +3,7 @@ pipeline {
 
     environment {
         IMAGE_NAME = 'surendracse/customerkyc'
+        DOCKER_CREDENTIALS_ID = '8f97f107-bbc2-401c-a703-e9b1b3153ae7'
     }
 
     stages {
