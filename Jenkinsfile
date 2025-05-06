@@ -3,7 +3,6 @@ pipeline {
 
     environment {
         IMAGE_NAME = 'surendracse/customerkyc'
-        DOCKER_CREDENTIALS_ID = '8f97f107-bbc2-401c-a703-e9b1b3153ae7'
     }
 
     stages {
@@ -15,13 +14,13 @@ pipeline {
 
         stage('Build') {
             steps {
-                sh './mvnw clean package -DskipTests=false'
+                bat '.\\mvnw.cmd clean package -DskipTests=false'
             }
         }
 
         stage('Test') {
             steps {
-                sh './mvnw test'
+                bat '.\\mvnw.cmd test'
             }
         }
 
