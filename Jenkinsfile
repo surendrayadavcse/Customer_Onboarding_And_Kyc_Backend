@@ -35,7 +35,7 @@ pipeline {
         stage('Docker Push') {
             steps {
                 script {
-                    docker.withRegistry('https://index.docker.io/v1/') {
+                    docker.withRegistry('https://index.docker.io/v1/','surendracreds') {
                         dockerImage.push()
                     }
                 }
