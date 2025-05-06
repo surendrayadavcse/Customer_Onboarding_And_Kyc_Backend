@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = 'kycproject'
+        IMAGE_NAME = 'surendracse/customerkyc'
      
     }
 
