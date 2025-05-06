@@ -3,6 +3,9 @@ pipeline {
 
     environment {
         IMAGE_NAME = 'surendracse/customerkyc'
+        DOCKER_IMAGE = 'surendracse/customerkyc'
+        DOCKER_TAG = "${env.BUILD_NUMBER}"
+        DOCKER_CREDENTIALS_ID = 'surendracreds' // Make sure this credential ID exists in Jenkins
     }
 
     stages {
@@ -27,17 +30,19 @@ pipeline {
         stage('Docker Build') {
             steps {
                 script {
-                   def dockerImage = docker.build("${IMAGE_NAME}:${env.BUILD_NUMBER}")
+                    bat "docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} ."
                 }
             }
         }
 
-        stage('Docker Push') {
+        stage('Push Docker Image') {
             steps {
-                script {
-                    docker.withRegistry('https://index.docker.io/v1/','surendracreds') {
-                        dockerImage.push()
-                    }
+                echo "🚀 Pushing Docker image: ${DOCKER_IMAGE}:${DOCKER_TAG}"
+                withCredentials([usernamePassword(credentialsId: "${DOCKER_CREDENTIALS_ID}", usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    bat """
+                    echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin
+                    docker push ${DOCKER_IMAGE}:${DOCKER_TAG}
+                    """
                 }
             }
         }
